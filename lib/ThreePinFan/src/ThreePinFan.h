@@ -2,6 +2,11 @@
 #define THREEPINFAN_HEADER_GUARD
 #include <Arduino.h>
 #include <PID_v1.h>
+#include <arduinoFFT.h>
+
+#define NUM_SAMPLES 256
+#define SAMPLING_FREQ 150
+#define SAMPLING_TIME_US 6667
 
 class ThreePinFan{
     public:
@@ -35,12 +40,40 @@ class ThreePinFan{
     double targetRPM;
     double controlSignal;
 
-    PID speedControlPID = PID(&currentRPM, &controlSignal, &targetRPM, proportionalConstant, integralConstant, differentialConstant, DIRECT);
+    float samples[NUM_SAMPLES];
+    /// @brief imaginary part of samples, this will be zero. 
+    float samplesImag[NUM_SAMPLES];
 
+    PID speedControlPID = PID(&currentRPM, &controlSignal, &targetRPM, proportionalConstant, integralConstant, differentialConstant, DIRECT);
+    arduinoFFT speedFFT; 
+
+    /// @brief initializer function for runtime initialization
     void begin();
     
+    /// @brief function to call in each loop
     void update();
+    /// @brief calculate the currentRPM using an FFT
+    /// @return current RPM
     float calculateRPM();
+    /// @brief wrapper function to execute gathering of one sample of the RPM signal
+    void getSample();
+    /// @brief wrapper function to recondition the FFT object
+    void updateFFT();
+    /// @brief /// @brief converts between frequency and RPM
+    /// @param freq to be converted
+    /// @return RPM
+    float freqToRPM(float freq);
+    /// @brief check wether a sample should be acquired based on the sampling time
+    /// @return true when a sample should be acquired
+    bool checkSampleTime();
+    /// @brief read value from signal pin
+    void readValue();
+    /// @brief shift all samples towards the end of the array
+    void shiftSamples();
+    /// @brief Add new element to the END of the sample array
+    void addNew();
+    /// @brief to be called in @ref begin to setup sample array. Basically fill it with zeros 
+    void initializeSampleArray();
     unsigned long getTimeDelta();
     bool detectChange();
 
