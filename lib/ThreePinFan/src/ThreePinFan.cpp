@@ -11,26 +11,6 @@ bool ThreePinFan::dutyCycleFunction(unsigned long period_us, double dutyCycle){
     return micros() % period_us < timeOn_us;
 }
 
-bool ThreePinFan::transitionControlToMeasure(){
-    return dutyCycleFunction(TIME_PERIOD_US, DUTY_CYCLE);
-}
-
-bool ThreePinFan::transitionMeasureToControl(){
-    return !dutyCycleFunction(TIME_PERIOD_US, DUTY_CYCLE);
-}
-
-void ThreePinFan::controlLogic(){
-    speedControlPID.Compute();
-    analogWrite(controlSignalPin, controlSignal);
-}
-
-void ThreePinFan::measureLogic(){
-    if(controlMachine.executeOnce){
-        digitalWrite(controlSignalPin, HIGH);
-    }
-    getRPM();
-}
-
 bool ThreePinFan::detectChange(){
     previousSensorValue = currentSensorValue;
     currentSensorValue = digitalRead(sensorPin);
@@ -73,7 +53,6 @@ void ThreePinFan::update(){
     else{
         controlRPM();
     }
-    controlMachine.run();
     // Serial.println("updating...");
 }
 

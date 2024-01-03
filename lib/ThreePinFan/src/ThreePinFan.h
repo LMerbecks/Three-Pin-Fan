@@ -40,16 +40,6 @@ class ThreePinFan{
     double controlSignal;
 
     PID speedControlPID = PID(&currentRPM, &controlSignal, &targetRPM, proportionalConstant, integralConstant, differentialConstant, DIRECT);
-    StateMachine controlMachine = StateMachine();
-
-    State* measure;
-    State* control;
-
-    void measureLogic();
-    void controlLogic();
-
-    bool transitionMeasureToControl();
-    bool transitionControlToMeasure();
 
     bool dutyCycleFunction(unsigned long period_us, double dutyCylce);
 
