@@ -35,6 +35,7 @@ void loop() {
     printedThisPeriod = true;
     Serial.println("Current RPM: " + String(myTestFan.currentRPM));
     Serial.println("Current PWM: " + String(myTestFan.controlSignal));
+    myTestFan.PrintVector(myTestFan.samples, NUM_SAMPLES, SCL_INDEX);
     
   }
   if(millis() % timePeriod > 1){
