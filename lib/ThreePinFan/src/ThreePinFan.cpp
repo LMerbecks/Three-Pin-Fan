@@ -6,6 +6,31 @@ ThreePinFan::ThreePinFan(uint8_t _controlSignalPin, uint8_t _sensorPin, float _d
     controlSignalPin = _controlSignalPin;
 }
 
+bool ThreePinFan::dutyCycleFunction(unsigned long period_us, double dutyCycle){
+    unsigned long timeOn_us = (unsigned long) period_us * dutyCycle;
+    return micros() % period_us < timeOn_us;
+}
+
+bool ThreePinFan::transitionControlToMeasure(){
+    return dutyCycleFunction(TIME_PERIOD_US, DUTY_CYCLE);
+}
+
+bool ThreePinFan::transitionMeasureToControl(){
+    return !dutyCycleFunction(TIME_PERIOD_US, DUTY_CYCLE);
+}
+
+void ThreePinFan::controlLogic(){
+    speedControlPID.Compute();
+    analogWrite(controlSignalPin, controlSignal);
+}
+
+void ThreePinFan::measureLogic(){
+    if(controlMachine.executeOnce){
+        digitalWrite(controlSignalPin, HIGH);
+    }
+    getRPM();
+}
+
 bool ThreePinFan::detectChange(){
     previousSensorValue = currentSensorValue;
     currentSensorValue = digitalRead(sensorPin);
@@ -26,6 +51,7 @@ float ThreePinFan::calculateRPM(){
 }
 
 void ThreePinFan::getRPM(){
+    digitalWrite(controlSignalPin, HIGH);
     if(detectChange()){
         currentRPM = calculateRPM();
     }
@@ -41,8 +67,13 @@ void ThreePinFan::setRPM(double _targetRPM){
 }
 
 void ThreePinFan::update(){
-    getRPM();
-    controlRPM();
+    if(dutyCycleFunction(TIME_PERIOD_US, DUTY_CYCLE)){
+        getRPM();
+    }
+    else{
+        controlRPM();
+    }
+    controlMachine.run();
     // Serial.println("updating...");
 }
 
@@ -57,3 +88,4 @@ void ThreePinFan::begin(){
     speedControlPID.SetOutputLimits(200, 255);
     speedControlPID.SetMode(AUTOMATIC);
 }
+

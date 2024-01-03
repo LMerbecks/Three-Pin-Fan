@@ -2,6 +2,10 @@
 #define THREEPINFAN_HEADER_GUARD
 #include <Arduino.h>
 #include <PID_v1.h>
+#include <StateMachine.h>
+
+#define DUTY_CYCLE 0.2
+#define TIME_PERIOD_US 100000
 
 class ThreePinFan{
     public:
@@ -36,6 +40,18 @@ class ThreePinFan{
     double controlSignal;
 
     PID speedControlPID = PID(&currentRPM, &controlSignal, &targetRPM, proportionalConstant, integralConstant, differentialConstant, DIRECT);
+    StateMachine controlMachine = StateMachine();
+
+    State* measure;
+    State* control;
+
+    void measureLogic();
+    void controlLogic();
+
+    bool transitionMeasureToControl();
+    bool transitionControlToMeasure();
+
+    bool dutyCycleFunction(unsigned long period_us, double dutyCylce);
 
     void begin();
     
