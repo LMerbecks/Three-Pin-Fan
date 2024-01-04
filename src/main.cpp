@@ -22,7 +22,7 @@ void setup() {
   // put your setup code here, to run once:
   myTestFan.begin();
   Serial.begin(115200);
-  myTestFan.setRPM(3000);
+  myTestFan.setRPM(2500);
   // myPID.SetMode(AUTOMATIC);
   // target = 512;
 }
@@ -33,8 +33,8 @@ void loop() {
 
   if((millis() % timePeriod <= 1) & !printedThisPeriod){
     printedThisPeriod = true;
-    Serial.println("Current RPM: " + String(myTestFan.currentRPM));
-    Serial.println("Current PWM: " + String(myTestFan.controlSignal));
+    // Serial.println("Current RPM: " + String(myTestFan.currentRPM));
+    // Serial.println("Current PWM: " + String(myTestFan.controlSignal));
     
   }
   if(millis() % timePeriod > 1){

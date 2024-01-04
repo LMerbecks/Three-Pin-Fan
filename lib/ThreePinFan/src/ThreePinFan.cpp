@@ -14,13 +14,18 @@ bool ThreePinFan::dutyCycleFunction(unsigned long period_us, double dutyCycle){
 bool ThreePinFan::detectChange(){
     previousSensorValue = currentSensorValue;
     currentSensorValue = digitalRead(sensorPin);
+    Serial.println(String(micros()) + "," + digitalRead(sensorPin));
     // Serial.println("curr State: " + String(currentSensorValue));
+    // Serial.println("prev State: " + String(previousSensorValue));
     return previousSensorValue != currentSensorValue;
 }
 
 unsigned long ThreePinFan::getTimeDelta(){
     previousTime_us = currentTime_us;
     currentTime_us = micros();
+    // Serial.println("current time: " + String(currentTime_us));
+    // Serial.println("previous time: " + String(previousTime_us));
+    // Serial.println("time delta: " + String(currentTime_us - previousTime_us));
     return currentTime_us - previousTime_us;
 }
 
@@ -34,6 +39,7 @@ void ThreePinFan::getRPM(){
     digitalWrite(controlSignalPin, HIGH);
     if(detectChange()){
         currentRPM = calculateRPM();
+        // Serial.println("curr RPM: " + String(currentRPM));
     }
 }
 
@@ -64,7 +70,7 @@ void ThreePinFan::begin(){
     currentTime_us = 0;
     previousSensorValue = LOW;
     previousTime_us = 0;
-    speedControlPID.SetOutputLimits(200, 255);
+    speedControlPID.SetOutputLimits(0, 255);
     speedControlPID.SetMode(AUTOMATIC);
 }
 
